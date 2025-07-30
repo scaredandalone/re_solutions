@@ -25,7 +25,7 @@
    /            \              \   \
    written by scaredandalone
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-link to the picoctf page: https://play.picoctf.org/practice/challenge/458?category=3&page=1&search=perplex
+link to the picoctf page: https://play.picoctf.org/practice/challenge/458
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
  Original Code from Ghidra diassembler:
