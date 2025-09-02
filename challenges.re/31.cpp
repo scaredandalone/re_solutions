@@ -1,4 +1,6 @@
 /*
+https://challenges.re/31/
+
 What does this code do?
 
 Optimizing MSVC 2012 x64
@@ -83,4 +85,5 @@ Our formula: estimate_new = (estimate + backup_input/estimate) / 2
 backup_input = a (the number we want the square root of)
 estimate = x_n (current square root estimate)
 estimate_new = x_(n+1) (improved estimate)
+
 */
