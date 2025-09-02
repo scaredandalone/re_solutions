@@ -1,4 +1,6 @@
 /*
+https://challenges.re/32/
+
                 public f
 f               proc near
 
@@ -145,4 +147,5 @@ Key differences in my C++ version:
 - Adds user input/output functionality
 - Uses modern C++ practices (size_t for indices)
 - Returns -1 for "not found" instead of 0/NULL
+
 */
