@@ -1,0 +1,130 @@
+https://challenges.re/33/
+PUBLIC    _f
+; Function compile flags: /Ogtpy
+_TEXT    SEGMENT
+_k0$ = -12            ; size = 4
+_k3$ = -8             ; size = 4
+_k2$ = -4             ; size = 4
+_v$ = 8               ; size = 4
+_k1$ = 12             ; size = 4
+_k$ = 12              ; size = 4
+_f    PROC
+    sub    esp, 12    ; 0000000cH           ;
+    mov    ecx, DWORD PTR _v$[esp+8]        ; 
+    mov    eax, DWORD PTR [ecx]             ; copy _v$ to eax
+    mov    ecx, DWORD PTR [ecx+4]           ; copy value at _v$ + 4 to ecx
+    push   ebx                              ; push ebx to stack
+    push   esi                              ; push esi to stack
+    mov    esi, DWORD PTR _k$[esp+16]       ; copy _k$ to esi
+    push   edi                              ; push edi to stack
+    mov    edi, DWORD PTR [esi]             ; copy _k$ to edi
+    mov    DWORD PTR _k0$[esp+24], edi      ; copy _k$ to _k0$
+    mov    edi, DWORD PTR [esi+4]           ; copy value at _k$ + 4 to edi
+    mov    DWORD PTR _k1$[esp+20], edi      ; copy value at _k$ + 4 to value at _k1$ + 4
+    mov    edi, DWORD PTR [esi+8]           ; copy value at _k$ + 8 to edi
+    mov    esi, DWORD PTR [esi+12]          ; copy value at _k$ + 12 to esi
+    xor    edx, edx                         ; clear edx
+    mov    DWORD PTR _k2$[esp+24], edi      ; copy value at _k$ + 8 to _k2$ + 24
+    mov    DWORD PTR _k3$[esp+24], esi      ; copy value at _k$ + 12 to _k3$ + 24
+    lea    edi, DWORD PTR [edx+32]          ; load address edx + 32 into edi
+$LL8@f:                                     ;
+    mov    esi, ecx                         ; copy _v$ to esi
+    shr    esi, 5                           ; shift esi right 5 bits
+    add    esi, DWORD PTR _k1$[esp+20]      ; add _k1$ to esi
+    mov    ebx, ecx                         ; copy _v$ to ebx
+    shl    ebx, 4                           ; shift ebx left 4 bits
+    add    ebx, DWORD PTR _k0$[esp+24]      ; add _k0$ to ebx
+    sub    edx, 1640531527   ; 61c88647H    ; edx = edx - 1640531527
+    xor    esi, ebx                         ; xor esi with ebx
+    lea    ebx, DWORD PTR [edx+ecx]         ; load address edx + ecx into ebx
+    xor    esi, ebx                         ; xor esi with ebx
+    add    eax, esi                         ; eax += esi
+    mov    esi, eax                         ; copy eax into esi
+    shr    esi, 5                           ; shift esi right 5 bits
+    add    esi, DWORD PTR _k3$[esp+24]      ; esi += _k3$
+    mov    ebx, eax                         ; ebx = eax
+    shl    ebx, 4                           ; ebx << 4
+    add    ebx, DWORD PTR _k2$[esp+24]      ; ebx += _k2$
+    xor    esi, ebx                         ; esi ^ ebx
+    lea    ebx, DWORD PTR [edx+eax]         ; load address edx + eax into ebx
+    xor    esi, ebx                         ; esi ^ ebx
+    add    ecx, esi                         ; ecx += esi
+    dec    edi                              ; edi--
+    jne    SHORT $LL8@f                     ; jump if not 0
+    mov    edx, DWORD PTR _v$[esp+20]       ; edx = _v$
+    pop    edi                              ; 
+    pop    esi                              ;
+    mov    DWORD PTR [edx], eax             ; _v$ = eax
+    mov    DWORD PTR [edx+4], ecx           ; _k1 = ecx
+    pop    ebx                              ;
+    add    esp, 12                    ; 0000000cH
+    ret    0
+_f    ENDP
+
+
+Analysis:
+Function takes 2 arguments. In the assembly we can see that they are 4 bytes each (with _k1$ being an alternate for _k$).
+We can see some pointer arithmetic in the assembly, for example:
+	_v$: accessed as [ecx] and [ecx+4] (2 dwords)
+	_k$: accessed as [esi], [esi+4], [esi+8], [esi+12] (4 dwords)
+We can conclude that _v$ is pointing to atleast an 8 byte structure, and _k$ a 16 byte structure.
+
+From here, we can see that we load the pointer itself into esi, and copy each of the dwords pointed to by _k$ into the local variables.
+	mov    esi, DWORD PTR _k$[esp+16]       ; Load pointer _k$ into esi (esi now points to the key array)
+	mov    edi, DWORD PTR [esi+4]           ; Load second element of key array (k[1]) into edi
+	mov    DWORD PTR _k1$[esp+20], edi      ; Store k[1] in local variable _k1$
+	mov    edi, DWORD PTR [esi+8]           ; Load third element of key array (k[2]) into edi  
+	mov    esi, DWORD PTR [esi+12]          ; Load fourth element of key array (k[3]) into esi
+
+Then we clear edx (xor edx, edx) and complete storing the remaining key elements into local variables:
+	mov    DWORD PTR _k2$[esp+24], edi      ; Store k[2] (from edi) into local variable _k2$
+	mov    DWORD PTR _k3$[esp+24], esi      ; Store k[3] (from esi) into local variable _k3$
+	
+edi is used as our counter in this program:
+    lea    edi, DWORD PTR [edx+32]       	; loads "32" into edi.
+	
+Further analysis proves this as:
+	dec    edi                              ; edi--
+    jne    SHORT $LL8@f                     ; jump if not 0
+	
+The program decrements edi, and repeats the loop until edi == 0.
+From this point forward, I am going to refer to k as key, since it becomes obvious that thats what it is after we look at the main loop.
+
+Lets get into the main loop:
+	mov    esi, ecx                         ; copy first data word to esi
+	shr    esi, 5                           ; shift right 5 bits
+	add    esi, DWORD PTR _k1$[esp+20]      ; add key[1] to shifted value
+	mov    ebx, ecx                         ; copy first data word to ebx  
+	shl    ebx, 4                           ; shift left 4 bits
+	add    ebx, DWORD PTR _k0$[esp+24]      ; add key[0] to shifted value
+	sub    edx, 1640531527                  ; subtract delta constant from sum
+	xor    esi, ebx                         ; XOR the two key-mixed values
+	lea    ebx, DWORD PTR [edx+ecx]         ; sum + first data word
+	xor    esi, ebx                         ; XOR with (sum + data)
+	add    eax, esi                         ; add result to second data word
+
+From what we saw earlier, _v$ is split into 2 dwords, stored in eax and ecx respectively.
+The key is also split, but into 4 dwords.
+This first part of the loop, uses the first 2 dwords from the key, with some bitwise operations and a magic constant subtraction to the first dword from _v$ to get an encoded output.
+This output is then also added to the second dword.
+
+Second Half:
+	mov    esi, eax                         ; copy second data word to esi
+	shr    esi, 5                           ; shift right 5 bits  
+	add    esi, DWORD PTR _k3$[esp+24]      ; add key[3] to shifted value
+	mov    ebx, eax                         ; copy second data word to ebx
+	shl    ebx, 4                           ; shift left 4 bits
+	add    ebx, DWORD PTR _k2$[esp+24]      ; add key[2] to shifted value
+	xor    esi, ebx                         ; XOR the two key-mixed values
+	lea    ebx, DWORD PTR [edx+eax]         ; sum + second data word
+	xor    esi, ebx                         ; XOR with (sum + data)
+	add    ecx, esi                         ; add result to first data word
+
+
+This is pretty much the same as the first half, just uses last 2 split keys, and doesn't use the magic constant subtraction.
+This also affects the first word in the next loop.
+
+https://softwareengineering.stackexchange.com/questions/63595/tea-algorithm-constant-0x9e3779b9-said-to-be-derived-from-golden-ratio-but-the
+https://en.wikipedia.org/wiki/Tiny_Encryption_Algorithm
+Looking up the magic constant, we can find a stackexchange thread.
+Looks like its the TEA algorithm, which is a block cipher known for its simplicity of description and implementation.
